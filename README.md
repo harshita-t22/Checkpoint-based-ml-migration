@@ -37,13 +37,13 @@ flowchart LR
 ## Project Structure
 
 ```text
-├── laptop1/
+├── local-system/
 │   ├── train.py
 │   ├── model.py
 │   ├── requirements.txt
 │   └── Dockerfile
 │
-├── laptop2/
+├── edge-system/
 │   ├── receiver.py
 │   ├── resume.py
 │   ├── model.py
@@ -78,7 +78,7 @@ flowchart LR
 **Edge System:**
 
 ```bash
-cd laptop2
+cd local-system
 docker build -t edge-system .
 docker run -d --name edge-system -p 5000:5000 edge-system
 ```
@@ -88,7 +88,7 @@ docker run -d --name edge-system -p 5000:5000 edge-system
 Update the edge system IP address in `laptop1/train.py`, then run:
 
 ```bash
-cd laptop1
+cd edge-system
 docker build -t main-system .
 docker run --name main-system main-system
 ```
