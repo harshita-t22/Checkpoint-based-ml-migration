@@ -1,198 +1,115 @@
-\# Checkpoint-Based Migration of ML Training Tasks Across Local and Edge Systems
-
-
-
-\## Overview
-
-
-
-This project implements checkpoint-based migration of machine learning training tasks from a main system to an edge system.
-
-
-
-The objective is to demonstrate how a running ML training task can be interrupted, its training state saved as a checkpoint, transferred to another system, and resumed from the saved state.
-
-
-
-The migration mechanism uses CPU utilization as a trigger to identify high resource usage on the main system.
-
-
-
-\## Objectives
-
-
-
-\- Train a machine learning model on a main system.
-
-\- Monitor CPU utilization during training.
-
-\- Save model and optimizer states periodically using checkpoints.
-
-\- Trigger migration when CPU utilization crosses a predefined threshold.
-
-\- Transfer the checkpoint to an edge system over HTTP.
-
-\- Restore the model and optimizer states on the edge system.
-
-\- Resume training from the saved epoch.
-
-
-
-\## System Architecture
-
-
-
-The project consists of two systems:
-
-
-
-\### 1. Main System
-
-
-
-\- Executes the ML training task.
-
-\- Monitors CPU utilization.
-
-\- Creates periodic training checkpoints.
-
-\- Transfers the latest checkpoint to the edge system when migration is triggered.
-
-
-
-\### 2. Edge System
-
-
-
-\- Runs an HTTP receiver using Flask.
-
-\- Receives checkpoint files from the main system.
-
-\- Restores the saved model and optimizer states.
-
-\- Resumes training from the checkpoint.
-
-
-
-\## Technologies Used
-
-
-
-\- Python
-
-\- PyTorch
-
-\- Torchvision
-
-\- Flask
-
-\- Docker
-
-\- Docker Volumes
-
-\- HTTP
-
-\- psutil
-
-
-
-\## Project Structure
-
-
-
-```text
-
-Checkpoint-Based-ML-Migration/
-
-│
-
-├── laptop1/
-
-│   ├── train.py
-
-│   ├── model.py
-
-│   ├── requirements.txt
-
-│   └── Dockerfile
-
-│
-
-└── laptop2/
-
-&#x20;   ├── receiver.py
-
-&#x20;   ├── resume.py
-
-&#x20;   ├── model.py
-
-&#x20;   ├── requirements.txt
-
-&#x20;   └── Dockerfile
-
+# Checkpoint-Based Migration of ML Training Tasks Across Local and Edge Systems
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.x-blue?logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/PyTorch-Deep%20Learning-ee4c2c?logo=pytorch&logoColor=white" />
+  <img src="https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker&logoColor=white" />
+  <img src="https://img.shields.io/badge/Flask-HTTP%20Receiver-black?logo=flask" />
+</p>
+
+## Overview
+
+A checkpoint-based migration system that transfers machine learning training workloads from a main system to an edge system when CPU utilization exceeds a predefined threshold.
+
+The system periodically saves model and optimizer states, transfers the latest checkpoint over HTTP, and resumes training on the destination system without restarting from scratch.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    A["Main System<br/>PyTorch Training"] --> B["CPU Monitoring"]
+    B --> C["Checkpointing"]
+    C --> D["HTTP Transfer"]
+    D --> E["Edge System<br/>Flask Receiver"]
+    E --> F["Restore Checkpoint"]
+    F --> G["Resume Training"]
 ```
 
+## Tech Stack
 
+- **Language:** Python
+- **ML Framework:** PyTorch
+- **Dataset:** MNIST
+- **Communication:** HTTP, Flask
+- **Resource Monitoring:** psutil
+- **Containerization:** Docker
 
-\## Workflow
+## Project Structure
 
+```text
+├── laptop1/
+│   ├── train.py
+│   ├── model.py
+│   ├── requirements.txt
+│   └── Dockerfile
+│
+├── laptop2/
+│   ├── receiver.py
+│   ├── resume.py
+│   ├── model.py
+│   ├── requirements.txt
+│   └── Dockerfile
+│
+└── README.md
+```
 
+## Workflow
 
-1\. The main system starts ML model training.
+1. Train a CNN model on the main system.
+2. Monitor CPU utilization continuously.
+3. Save checkpoints at regular intervals.
+4. Trigger migration when CPU usage exceeds the configured threshold.
+5. Transfer the latest checkpoint to the edge system.
+6. Restore the model and optimizer states.
+7. Resume training from the saved epoch.
 
-2\. CPU utilization is monitored during execution.
+## Configuration
 
-3\. Checkpoints are periodically saved.
+| Parameter | Value |
+|---|---:|
+| Training epochs | 30 |
+| Batch size | 64 |
+| Learning rate | 0.001 |
+| Checkpoint interval | 5 epochs |
+| CPU threshold | 72% |
 
-4\. When CPU utilization exceeds the configured threshold, training is interrupted at a batch boundary.
+## Running the Project
 
-5\. The latest available checkpoint is transferred to the edge system.
+**Edge System:**
 
-6\. The edge system restores the checkpoint.
+```bash
+cd laptop2
+docker build -t edge-system .
+docker run -d --name edge-system -p 5000:5000 edge-system
+```
 
-7\. Training resumes from the saved epoch.
+**Main System:**
 
+Update the edge system IP address in `laptop1/train.py`, then run:
 
+```bash
+cd laptop1
+docker build -t main-system .
+docker run --name main-system main-system
+```
 
-\## Experimental Evaluation
+Both systems must be reachable over the network. Configure persistent Docker volumes as shown in the project setup when running experiments.
 
+## Evaluation Metrics
 
+- Checkpoint creation time and size
+- Checkpoint transfer time
+- Checkpoint restoration time
+- CPU and memory utilization
+- Training progress preserved during migration
 
-The project evaluates:
+## Future Scope
 
+- Adaptive checkpoint scheduling
+- Network-aware migration
+- Secure checkpoint transfer
+- Multi-node edge migration
 
+---
 
-\- Checkpoint creation time.
-
-\- Checkpoint file size.
-
-\- Checkpoint transfer time.
-
-\- Checkpoint restoration time.
-
-\- CPU and memory utilization.
-
-\- Training progress preserved during migration.
-
-
-
-Experimental results will be documented based on actual measurements.
-
-
-
-\## Running the Project
-
-
-
-Both systems use Docker containers to provide isolated execution environments.
-
-
-
-Refer to the Dockerfiles and requirements files in the respective `laptop1` and `laptop2` directories for setup details.
-
-
-
-
-
-
-
+**Academic Team Project | Cloud Computing**
