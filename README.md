@@ -85,7 +85,7 @@ docker run -d --name edge-system -p 5000:5000 edge-system
 
 **Main System:**
 
-Update the edge system IP address in `laptop1/train.py`, then run:
+Update the edge system IP address in `local-system/train.py`, then run:
 
 ```bash
 cd edge-system
