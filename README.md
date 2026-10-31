@@ -110,6 +110,4 @@ Both systems must be reachable over the network. Configure persistent Docker vol
 - Secure checkpoint transfer
 - Multi-node edge migration
 
----
 
-**Academic Team Project | Cloud Computing**
