@@ -1,4 +1,5 @@
 import os
+import time
 import threading
 import requests
 import torch
@@ -19,7 +20,7 @@ LEARNING_RATE = 0.001
 
 CHECKPOINT_INTERVAL = 5
 
-CPU_THRESHOLD = 75.0
+CPU_THRESHOLD = 72.0
 CPU_MONITOR_INTERVAL = 1
 
 CHECKPOINT_DIR = "/app/checkpoints"
@@ -105,11 +106,30 @@ def save_checkpoint(epoch, model, optimizer, loss, accuracy):
 
     temp_path = CHECKPOINT_PATH + ".tmp"
 
+    # Measure checkpoint creation time
+    checkpoint_start = time.perf_counter()
+
     torch.save(checkpoint, temp_path)
     os.replace(temp_path, CHECKPOINT_PATH)
 
+    checkpoint_time = time.perf_counter() - checkpoint_start
+
+    checkpoint_size = (
+        os.path.getsize(CHECKPOINT_PATH) / (1024 * 1024)
+    )
+
     print(
         f"Checkpoint saved at epoch {epoch}",
+        flush=True
+    )
+
+    print(
+        f"Checkpoint creation time: {checkpoint_time:.4f} seconds",
+        flush=True
+    )
+
+    print(
+        f"Checkpoint size: {checkpoint_size:.2f} MB",
         flush=True
     )
 
@@ -143,7 +163,13 @@ def send_checkpoint():
 
     print("\nSending latest checkpoint to Edge System...", flush=True)
 
+    transfer_start = time.perf_counter()
+
     try:
+
+        checkpoint_size = (
+            os.path.getsize(CHECKPOINT_PATH) / (1024 * 1024)
+        )
 
         with open(CHECKPOINT_PATH, "rb") as file:
 
@@ -153,6 +179,27 @@ def send_checkpoint():
                     "checkpoint": ("checkpoint.pth", file)
                 },
                 timeout=120
+            )
+
+        transfer_time = time.perf_counter() - transfer_start
+
+        print(
+            f"Checkpoint transfer time: {transfer_time:.4f} seconds",
+            flush=True
+        )
+
+        print(
+            f"Checkpoint transfer size: {checkpoint_size:.2f} MB",
+            flush=True
+        )
+
+        if transfer_time > 0:
+
+            transfer_speed = checkpoint_size / transfer_time
+
+            print(
+                f"Effective transfer speed: {transfer_speed:.2f} MB/s",
+                flush=True
             )
 
         print("Edge response:", response.text, flush=True)
@@ -167,6 +214,13 @@ def send_checkpoint():
             return True
 
     except requests.RequestException as e:
+
+        transfer_time = time.perf_counter() - transfer_start
+
+        print(
+            f"Transfer attempt duration: {transfer_time:.4f} seconds",
+            flush=True
+        )
 
         print("Migration failed:", e, flush=True)
 
